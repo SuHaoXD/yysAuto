@@ -1,19 +1,16 @@
 #author:SuHaoXD
 #E-mail:suhaoxd@qq.com
 # -*- coding: utf-8 -*-
-import win32api
-import win32gui
-import win32con
-import random
+import win32api,win32gui,win32con
+import random,threading,time,sys
 import numpy
 import cv2
 import pyautogui
 from win32gui import *
 from PyQt5 import QtWidgets, QtGui
-from PyQt5.QtWidgets import QApplication,QWidget, QPushButton, QVBoxLayout,QHBoxLayout,QDesktopWidget
+from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import *
-import sys
-import time
+# from PyQt5.QtWidgets import QWidget, QPushButton, QVBoxLayout,QHBoxLayout,QDesktopWidget
 
 def resolution():  # 获取屏幕分辨率
     return win32api.GetSystemMetrics(0), win32api.GetSystemMetrics(1)
@@ -38,11 +35,12 @@ def getGameScreen(handle):
 
 def getScreenMean(x1,y1,x2,y2):  # 截取位置 一般 485 460 635 560   
 	img = cv2.imread("yys.jpg")
+	if img.shape[0]<5:
+		return 0
 	img = img[y1:y2,x1:x2]
-	# cv2.imshow("img",img)
-	# cv2.waitKey(0)
-	# cv2.destroyAllWindows()
-	# print(img.shape)
+	cv2.imshow("img",img)
+	cv2.waitKey(0)
+	cv2.destroyAllWindows()
 	f = img[:,:,0]+img[:,:,1]+img[:,:,2]
 	return f.mean()
 
@@ -50,7 +48,8 @@ def MouseClick(x1,y1,x2,y2):  #鼠标点击
 	x = random.randint(x1,x2)
 	y = random.randint(y1,y2)
 	t = random.random()+0.2
-	pyautogui.moveTo(x, y, duration=t, tween=pyautogui.easeInOutQuad)
+	pyautogui.moveTo(x, y, duration=t, tween=pyautogui.easeInBounce)
+	time.sleep(random.random())
 	pyautogui.click()
 	print("点击了："+str(x)+","+str(y))
 
@@ -58,14 +57,16 @@ def MouseMove():  #随机移动鼠标
 	x = random.randint(900,1900)
 	y = random.randint(10,1000)
 	t = random.random()+0.2
-	pyautogui.moveTo(x, y, duration=t, tween=pyautogui.easeInOutQuad)
-
+	pyautogui.moveTo(x, y, duration=t, tween=pyautogui.easeInBounce)
 
 
 def SetLive(zhibo,handle):  #获取焦点
 	if not zhibo or handle==0:
 		return
 	win32gui.SetForegroundWindow(handle)
+
+
+# def Ch
 
 def Auto(T,handle,imgx1,imgy1,imgx2,imgy2,fs,fe,zhibo=False,hzhibo=0):
 	i,j = 0,0
@@ -77,12 +78,24 @@ def Auto(T,handle,imgx1,imgy1,imgx2,imgy2,fs,fe,zhibo=False,hzhibo=0):
 			sys.exit(0)
 		time.sleep(random.randint(3,8)+random.random())  #每次截图间隔为随机3秒到8秒之间
 		getGameScreen(handle)
+
+		if i%10==0：         #每截图10次检查有没有被拉悬赏
+			xs = getScreenMean(499,141,646,171)  #悬赏位置 499,141,646,171
+			if abs(xs-153.12)<0.1:          #特征153.12
+			   win32gui.SetForegroundWindow(handle) 
+			   time.sleep(random.random())
+			   MouseClick(739,383,854,422)     # 点击位置  739,383,854,422
+			   continue
+
 		f = getScreenMean(imgx1,imgy1,imgx2,imgy2)
 		print(f)
 		if abs(f-fs)<0.1:  #开始按钮：971, 549 1068, 646
 			win32gui.SetForegroundWindow(handle)
 			time.sleep(random.random())
 			MouseClick(971,549,1068,646)
+			# th1 = threading.Thread(target=MouseClick, args=(971,549,1068,646),name="thread1")
+			# th1.start()
+			# th1.join()
 			j +=1
 			time.sleep(random.randint(1,3)+random.random())
 			MouseMove()  #随机移动鼠标
@@ -102,6 +115,7 @@ def Auto(T,handle,imgx1,imgy1,imgx2,imgy2,fs,fe,zhibo=False,hzhibo=0):
 
 def Model(m,T,zhibo=False):
 	handle = win32gui.FindWindow(0,"阴阳师-网易游戏")
+	hzhibo = 0
 	if zhibo:
 		hzhibo = win32gui.FindWindow(0,getWinName("斗鱼"))
 
@@ -178,19 +192,23 @@ def Model(m,T,zhibo=False):
 # 		sys.exit(0)
 
 if __name__ == '__main__':
-	Model("yulin4",5000,True)
+	# Model("yulin4",5000,0)
 
 
 	# app = QApplication(sys.argv)
 	# A = App()
 	# A.show()
 	# sys.exit(app.exec_())
-	# handle = win32gui.FindWindow(0,"阴阳师-网易游戏")
+	handle = win32gui.FindWindow(0,"阴阳师-网易游戏")
 	# hzhibo = win32gui.FindWindow(0,getWinName("斗鱼"))
 	# win32gui.SetForegroundWindow(hzhibo)
 	# print(getWinName("斗鱼"))
 	# print(hzhibo)
-	# print(getScreenMean(485,460,635,560))
-	# a = pyautogui.position()
+	# getGameScreen(handle)
+	# print(getScreenMean(499,141,646,171))     #特征值 153.126    点击 739 383   854 422
+
+
+	print(win32gui.GetWindowRect(handle))
+	# a = pyautogui.position()  
 	# print(a)
 
