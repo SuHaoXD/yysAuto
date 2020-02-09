@@ -38,9 +38,9 @@ def getScreenMean(x1,y1,x2,y2):  # 截取位置 一般 485 460 635 560
 	if img.shape[0]<5:
 		return 0
 	img = img[y1:y2,x1:x2]
-	cv2.imshow("img",img)
-	cv2.waitKey(0)
-	cv2.destroyAllWindows()
+	# cv2.imshow("img",img)
+	# cv2.waitKey(0)
+	# cv2.destroyAllWindows()
 	f = img[:,:,0]+img[:,:,1]+img[:,:,2]
 	return f.mean()
 
@@ -74,12 +74,12 @@ def Auto(T,handle,imgx1,imgy1,imgx2,imgy2,fs,fe,zhibo=False,hzhibo=0):
 	while True:
 		spend = time.time() - start
 		print(i,j,spend)
-		if spend > T:
+		if spend > T:        #超时停止
 			sys.exit(0)
 		time.sleep(random.randint(3,8)+random.random())  #每次截图间隔为随机3秒到8秒之间
 		getGameScreen(handle)
 
-		if i%10==0：         #每截图10次检查有没有被拉悬赏
+		if i%10==0:         #每截图10次检查有没有被拉悬赏
 			xs = getScreenMean(499,141,646,171)  #悬赏位置 499,141,646,171
 			if abs(xs-153.12)<0.1:          #特征153.12
 			   win32gui.SetForegroundWindow(handle) 
@@ -109,7 +109,7 @@ def Auto(T,handle,imgx1,imgy1,imgx2,imgy2,fs,fe,zhibo=False,hzhibo=0):
 			MouseMove()
 		print("")
 		i +=1
-		if j>2: 
+		if j>2:   #终止机制，连续点开始按钮3次终止程序
 			sys.exit(0)
 
 
@@ -129,6 +129,8 @@ def Model(m,T,zhibo=False):
 		Auto(T,handle,485,460,635,560,116.97,99.7,zhibo,hzhibo)
 	if m=="yeyuanhuo":  #业原火
 		Auto(T,handle,485,460,635,560,115.75,99.7,zhibo,hzhibo)
+	if m=="rilun":
+		Auto(T,handle,485,460,635,560,116.27,99.7,zhibo,hzhibo)
 	else:
 		print("模式输入错误")
 		sys.exit(0)
@@ -192,23 +194,23 @@ def Model(m,T,zhibo=False):
 # 		sys.exit(0)
 
 if __name__ == '__main__':
-	# Model("yulin4",5000,0)
-
+	Model("rilun",5000,1)
+	# MouseClick(971,549,1068,646)
 
 	# app = QApplication(sys.argv)
 	# A = App()
 	# A.show()
 	# sys.exit(app.exec_())
-	handle = win32gui.FindWindow(0,"阴阳师-网易游戏")
+	# handle = win32gui.FindWindow(0,"阴阳师-网易游戏")
 	# hzhibo = win32gui.FindWindow(0,getWinName("斗鱼"))
 	# win32gui.SetForegroundWindow(hzhibo)
 	# print(getWinName("斗鱼"))
 	# print(hzhibo)
 	# getGameScreen(handle)
-	# print(getScreenMean(499,141,646,171))     #特征值 153.126    点击 739 383   854 422
+	# print(getScreenMean(485,460,635,560))     #特征值 153.126    点击 739 383   854 422
 
 
-	print(win32gui.GetWindowRect(handle))
+	# print(win32gui.GetWindowRect(handle))
 	# a = pyautogui.position()  
 	# print(a)
 
