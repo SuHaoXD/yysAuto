@@ -42,10 +42,17 @@
 5.执行 【python yysAuto.pyc 参数1 参数2 参数3】运行脚本
   
   参数1表示挂机模式：
-     yulin1:神龙   yulin2:白藏主   yulin3:黑豹    yulin4:朱雀    hun10:魂十   hun11:魂土
+     yulin1:神龙   yulin2:白藏主   yulin3:黑豹    yulin4:朱雀    hun10:魂十   hun11:大蛇悲鸣  rilun:日轮之城
    
   参数2表示挂机时长，以秒计算
-
+  
+  参数3表示是否开启直播模式：1表示开启（需要浏览器打开某鱼直播窗口，且不能最小化窗口） 0表示不开启
+  
+  举例：
+  
+  python yysAuto.pyc yulin3 5000 1     表示挂御灵黑豹5000秒，开启看直播模式
+  
+  python yysAuto.pyc hun10 10000 0     表示挂机魂十10000秒，不开启直播模式    
 
 ```
 
