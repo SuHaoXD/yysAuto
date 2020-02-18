@@ -1,6 +1,6 @@
+# -*- coding: utf-8 -*-
 #author:SuHaoXD
 #E-mail:suhaoxd@qq.com
-# -*- coding: utf-8 -*-
 import win32api,win32gui,win32con
 import random,threading,time,sys
 import numpy
@@ -33,14 +33,16 @@ def getGameScreen(handle):
 	img = screen.grabWindow(handle).toImage()
 	img.save("yys.jpg")
 
-def getScreenMean(x1,y1,x2,y2):  # 截取位置 一般 485 460 635 560   
+def getScreenMean(imgp,show=False):  # 截取位置 一般 485 460 635 560   
+	x1,y1,x2,y2 = imgp[0],imgp[1],imgp[2],imgp[3]
 	img = cv2.imread("yys.jpg")
 	if img.shape[0]<5:
 		return 0
 	img = img[y1:y2,x1:x2]
-	# cv2.imshow("img",img)
-	# cv2.waitKey(0)
-	# cv2.destroyAllWindows()
+	if show:
+		cv2.imshow("img",img)
+		cv2.waitKey(0)
+		cv2.destroyAllWindows()
 	f = img[:,:,0]+img[:,:,1]+img[:,:,2]
 	return f.mean()
 
@@ -66,48 +68,46 @@ def SetLive(zhibo,handle):  #获取焦点
 	win32gui.SetForegroundWindow(handle)
 
 
-# def Ch
-
-def Auto(T,handle,imgx1,imgy1,imgx2,imgy2,fs,fe,zhibo=False,hzhibo=0):
-	i,j = 0,0
+def Auto(T,handle,imgstart,imgend,ts,te,zhibo=False,hzhibo=0):
+	i,j,k = 1,0,0    #截图次数，自动停止参数，战斗完成次数
 	start = time.time()
 	try:
 		while True:
 			spend = time.time() - start
-			print(i,j,spend)
-			if spend > T:        #超时停止
+			spend = round(spend,2)
+			print("第"+str(i)+"次截图	",end="")
+			print("已完成"+str(k)+"次战斗		",end="")
+			print("已挂机"+str(spend)+"秒	")
+			if (k>T[0]) or (spend > T[1]):        #超时停止
 				print("已达挂机时长，停止运行")
 				sys.exit(0)
-			time.sleep(random.randint(3,6)+random.random())  #每次截图间隔为随机3秒到6秒之间
+			time.sleep(random.randint(2,4)+random.random())  #每次截图间隔为随机2秒到4秒之间
 			getGameScreen(handle)
 
-			if i%10==0:         #每截图10次检查有没有被拉悬赏
-				xs = getScreenMean(499,141,646,171)  #悬赏位置 499,141,646,171
-				if abs(xs-153.12)<0.1:          #特征153.12
-				   win32gui.SetForegroundWindow(handle) 
-				   time.sleep(random.random())
-				   MouseClick(739,383,854,422)     # 点击位置  739,383,854,422
-				   continue
+			xs = getScreenMean((499,141,646,171))  #检测悬赏，悬赏位置 499,141,646,171
+			if abs(xs-153.12)<0.05:          #特征153.12
+			   win32gui.SetForegroundWindow(handle) 
+			   time.sleep(random.random())
+			   MouseClick(739,383,854,422)     # 点击位置  739,383,854,422
+			   continue
 
-			f = getScreenMean(imgx1,imgy1,imgx2,imgy2)
-			print(f)
-			if abs(f-fs)<0.5:  #开始按钮：971, 549 1068, 646
-				print(f-fs)
+			fs = getScreenMean(imgstart)
+			fe = getScreenMean(imgend)
+			print("特征值:"+ str(fs)+" "+str(fe))
+			if abs(fs-ts)<0.05:  #开始按钮：971, 549 1068, 646
 				win32gui.SetForegroundWindow(handle)
 				time.sleep(random.random())
 				MouseClick(971,549,1068,646)
-				# th1 = threading.Thread(target=MouseClick, args=(971,549,1068,646),name="thread1")
-				# th1.start()
-				# th1.join()
 				j +=1
 				time.sleep(random.randint(1,3)+random.random())
 				MouseMove()  #随机移动鼠标
 				time.sleep(random.random())
 				SetLive(zhibo,hzhibo)
-			if abs(f-fe)<0.5:  #结束画面 左上角 197, 222  右下角 836, 518
+			if abs(fe-te)<0.05:  #结束画面 左上角 197, 222  右下角 836, 518
 				win32gui.SetForegroundWindow(handle)
 				MouseClick(197,434,836,518)
 				j = 0
+				k +=1
 				time.sleep(1+random.random())
 				MouseMove()
 			print("")
@@ -120,30 +120,53 @@ def Auto(T,handle,imgx1,imgy1,imgx2,imgy2,fs,fe,zhibo=False,hzhibo=0):
 
 def Model(m,T,zhibo=False):
 	handle = win32gui.FindWindow(0,"阴阳师-网易游戏")
+	if handle==0:
+		print("未检测到PC端游戏")
+		sys.exit(0)
+
 	hzhibo = 0
 	if zhibo:
 		hzhibo = win32gui.FindWindow(0,getWinName("斗鱼"))
-
 	if m=="yulin1":  #神龙 
-		Auto(T,handle,485,460,635,560,114.40,99.7,zhibo,hzhibo)
+		imgstart = (980,520,1080,615)    ##123.5857
+		imgend = (485,460,635,560)
+		Auto(T,handle,imgstart,imgend,114.40,99.5,zhibo,hzhibo)
 	if m=="yulin2":  #白藏主
-		Auto(T,handle,485,460,635,560,120.36,99.7,zhibo,hzhibo)
+		Auto(T,handle,485,460,635,560,120.36,99.5,zhibo,hzhibo)
 	if m=="yulin3":	  #黑豹
-		Auto(T,handle,485,460,635,560,116.18,99.7,zhibo,hzhibo)
+		Auto(T,handle,485,460,635,560,116.18,99.5,zhibo,hzhibo)
 	if m=="yulin4":	  #孔雀
-		Auto(T,handle,485,460,635,560,116.97,99.7,zhibo,hzhibo)
+		Auto(T,handle,485,460,635,560,116.97,99.5,zhibo,hzhibo)
 	if m=="yeyuanhuo":  #业原火
-		Auto(T,handle,485,460,635,560,115.75,99.7,zhibo,hzhibo)
+		Auto(T,handle,485,460,635,560,115.75,99.5,zhibo,hzhibo)
 	if m=="rilun":  #日轮之城
-		Auto(T,handle,485,460,635,560,116.27,99.7,zhibo,hzhibo)
+		imgstart = (250,425,320,450)    ##80.31
+		imgend = (485,460,635,560)
+		Auto(T,handle,imgstart,imgend,82.75,99.5,zhibo,hzhibo)
 	if m=="hun10":   #魂10
-		Auto(T,handle,485,460,635,560,119.32,99.7,zhibo,hzhibo)
-	if m=="hun11":   #魂10
-		Auto(T,handle,485,460,635,560,121.0,99.7,zhibo,hzhibo)
+		imgstart = (255,400,315,425)    ##89.79
+		imgend = (485,460,635,560)
+		Auto(T,handle,imgstart,imgend,89.79,99.5,zhibo,hzhibo)
+	if m=="hun11":   #魂11
+		imgstart = (255,497,315,523)    ##82.288
+		imgend = (485,460,635,560)
+		Auto(T,handle,imgstart,imgend,82.288,99.5,zhibo,hzhibo)
 	else:
 		print("模式输入错误")
 		sys.exit(0)
 
+
+def Main():
+	if len(sys.argv) != 5:
+		print("参数输入错误！")
+		sys.exit(0)
+	m = sys.argv[1]    #模式
+	try:
+		t = (int(sys.argv[2]),int(sys.argv[3]))   # 挂机战斗次数和挂机时间
+		z = int(sys.argv[4])
+	except KeyboardInterrupt:
+		print("请输入整数！")
+	Model(m,t,z)
 # class App(QWidget):
 # 	def __init__(self):
 # 		super().__init__()
@@ -203,14 +226,9 @@ def Model(m,T,zhibo=False):
 # 		sys.exit(0)
 
 if __name__ == '__main__':
-	if len(sys.argv) != 4:
-		print("参数输入错误！")
-		sys.exit(0)
-	m = sys.argv[1]
-	t = int(sys.argv[2])
-	z = int(sys.argv[3])
+	Main() 
 
-	Model(m,t,z)  
+	# Model("rilun",2000)
 	# print(120.63386666666666-120.0)
 	# MouseClick(971,549,1068,646)
 	# app = QApplication(sys.argv)
@@ -223,10 +241,10 @@ if __name__ == '__main__':
 	# print(getWinName("斗鱼"))
 	# print(hzhibo)
 	# getGameScreen(handle)
-	# print(getScreenMean(485,460,635,560))     #特征值 153.126    点击 739 383   854 422
+	# P = (255,497,315,523)   #250,400,320,425
+	# print(getScreenMean(P,1))    
 
 	# print(int(sys.argv[2]))
 	# print(win32gui.GetWindowRect(handle))
 	# a = pyautogui.position()  
 	# print(a)
-
