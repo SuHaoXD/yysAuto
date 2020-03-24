@@ -69,7 +69,7 @@ def SetLive(zhibo,handle):  #获取焦点
 
 
 def Auto(T,handle,imgstart,imgend,ts,te,zhibo=False,hzhibo=0):
-	i,j,k = 1,0,0    #截图次数，自动停止参数，战斗完成次数
+	i,j,k,l = 1,0,0,0    #截图次数，自动停止参数，战斗完成次数  截图无反应次数
 	start = time.time()
 	try:
 		while True:
@@ -78,10 +78,15 @@ def Auto(T,handle,imgstart,imgend,ts,te,zhibo=False,hzhibo=0):
 			print("第"+str(i)+"次截图	",end="")
 			print("已完成"+str(k)+"次战斗		",end="")
 			print("已挂机"+str(spend)+"秒	")
-			if (k>T[0]) or (spend > T[1]):        #超时停止
+			if (k>=T[0]) or (spend > T[1]):        #超时停止
 				print("已达挂机时长，停止运行")
+				print("\a")
+				time.sleep(1)
+				print("\a")
+				time.sleep(1)
+				print("\a")
 				sys.exit(0)
-			time.sleep(random.randint(2,4)+random.random())  #每次截图间隔为随机2秒到4秒之间
+			time.sleep(random.randint(1,3)+random.random())  #每次截图间隔为随机2秒到4秒之间
 			getGameScreen(handle)
 
 			xs = getScreenMean((499,141,646,171))  #检测悬赏，悬赏位置 499,141,646,171
@@ -99,6 +104,8 @@ def Auto(T,handle,imgstart,imgend,ts,te,zhibo=False,hzhibo=0):
 				time.sleep(random.random())
 				MouseClick(971,549,1068,646)
 				j +=1
+				k +=1
+				l = 0
 				time.sleep(random.randint(1,3)+random.random())
 				MouseMove()  #随机移动鼠标
 				time.sleep(random.random())
@@ -106,20 +113,27 @@ def Auto(T,handle,imgstart,imgend,ts,te,zhibo=False,hzhibo=0):
 			if abs(fe-te)<0.05:  #结束画面 左上角 197, 222  右下角 836, 518
 				win32gui.SetForegroundWindow(handle)
 				MouseClick(197,434,836,518)
-				j = 0
-				k +=1
+				j,l = 0,0
 				time.sleep(1+random.random())
 				MouseMove()
 			print("")
 			i +=1
-			if j>2:   #终止机制，连续点开始按钮3次终止程序
+			l +=1   #截图无操作限制
+			if j>2 or l>100:   #终止机制，连续点开始按钮3次终止程序
 				print("点击开始按钮无响应，停止运行")
+				print("\a")
+				time.sleep(1)
+				print("\a")
+				time.sleep(1)
+				print("\a")
 				sys.exit(0)
 	except KeyboardInterrupt:
 		print("手动停止")
 
 def Model(m,T,zhibo=False):
-	handle = win32gui.FindWindow(0,"阴阳师-网易游戏")
+	handle = win32gui.FindWindow(0,"阴阳师-网易游戏")   ##窗口大小 1136X640
+	win32gui.MoveWindow(handle,-7,0,1136,640,True)
+
 	if handle==0:
 		print("未检测到PC端游戏")
 		sys.exit(0)
@@ -128,21 +142,29 @@ def Model(m,T,zhibo=False):
 	if zhibo:
 		hzhibo = win32gui.FindWindow(0,getWinName("斗鱼"))
 	if m=="yulin1":  #神龙 
-		imgstart = (980,520,1080,615)    ##123.5857
+		imgstart = (255,455,315,480)    ##89.79
 		imgend = (485,460,635,560)
-		Auto(T,handle,imgstart,imgend,114.40,99.5,zhibo,hzhibo)
+		Auto(T,handle,imgstart,imgend,86.41,99.66,zhibo,hzhibo)
 	if m=="yulin2":  #白藏主
-		Auto(T,handle,485,460,635,560,120.36,99.5,zhibo,hzhibo)
+		imgstart = (255,455,315,480)    ##89.79
+		imgend = (485,460,635,560)
+		Auto(T,handle,imgstart,imgend,86.41,99.66,zhibo,hzhibo)
 	if m=="yulin3":	  #黑豹
-		Auto(T,handle,485,460,635,560,116.18,99.5,zhibo,hzhibo)
+		imgstart = (255,455,315,480)    ##89.79
+		imgend = (485,460,635,560)
+		Auto(T,handle,imgstart,imgend,86.57,99.66,zhibo,hzhibo)
 	if m=="yulin4":	  #孔雀
-		Auto(T,handle,485,460,635,560,116.97,99.5,zhibo,hzhibo)
+		imgstart = (245,425,330,450)    ##89.79
+		imgend = (485,460,635,560)
+		Auto(T,handle,imgstart,imgend,86.41,99.66,zhibo,hzhibo)
 	if m=="yeyuanhuo":  #业原火
-		Auto(T,handle,485,460,635,560,115.75,99.5,zhibo,hzhibo)
+		imgstart = (245,425,330,450)    ##91.43
+		imgend = (485,460,635,560)
+		Auto(T,handle,imgstart,imgend,91.43,99.56,zhibo,hzhibo)
 	if m=="rilun":  #日轮之城
 		imgstart = (250,425,320,450)    ##80.31
 		imgend = (485,460,635,560)
-		Auto(T,handle,imgstart,imgend,82.75,99.5,zhibo,hzhibo)
+		Auto(T,handle,imgstart,imgend,80.306,99.652,zhibo,hzhibo)
 	if m=="hun10":   #魂10
 		imgstart = (255,400,315,425)    ##89.79
 		imgend = (485,460,635,560)
@@ -150,7 +172,7 @@ def Model(m,T,zhibo=False):
 	if m=="hun11":   #魂11
 		imgstart = (255,497,315,523)    ##82.288
 		imgend = (485,460,635,560)
-		Auto(T,handle,imgstart,imgend,82.288,99.5,zhibo,hzhibo)
+		Auto(T,handle,imgstart,imgend,82.287,99.5,zhibo,hzhibo)
 	else:
 		print("模式输入错误")
 		sys.exit(0)
@@ -240,8 +262,11 @@ if __name__ == '__main__':
 	# win32gui.SetForegroundWindow(hzhibo)
 	# print(getWinName("斗鱼"))
 	# print(hzhibo)
+
+	##
+	# handle = win32gui.FindWindow(0,"阴阳师-网易游戏")
 	# getGameScreen(handle)
-	# P = (255,497,315,523)   #250,400,320,425
+	# P = (245,425,330,450)  
 	# print(getScreenMean(P,1))    
 
 	# print(int(sys.argv[2]))
